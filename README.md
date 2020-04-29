@@ -20,6 +20,11 @@ You can also:
 ## Usage
 
 ```terraform
+provider "azurerm" {
+  version = "~> 2.7.0"
+  features {}
+}
+
 resource "azurerm_resource_group" "test" {
   name     = "myTestResourceGroup"
   location = "West Europe"
@@ -31,12 +36,13 @@ resource "azurerm_resource_group" "test" {
 }
 
 module "network" {
-  source                 = "terraform-azurerm-modules/terraform-azure-vnet"
-  resource_group_name    = azurerm_resource_group.test.name
+  source                 = "github.com/terraform-azurerm-modules/terraform-azure-vnet"
+  resource_group         = azurerm_resource_group.test.name
   location               = azurerm_resource_group.test.location
   tags                   = azurerm_resource_group.test.tags
 
-  address_space          = "10.0.0.0/24"
+  vnet_name              = "hub"
+  address_space          = [ "10.0.0.0/24" ]
   dns_servers            = [ "10.0.0.68", "10.0.0.69" ]
 
   subnets                = {
