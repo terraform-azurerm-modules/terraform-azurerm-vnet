@@ -1,4 +1,4 @@
-# terraform-azure-vnet
+# terraform-azurerm-vnet
 
 ## Description
 
