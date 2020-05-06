@@ -19,6 +19,8 @@ You can also:
 
 ## Usage
 
+### Simple Hub Example
+
 ```terraform
 provider "azurerm" {
   version = "~> 2.7.0"
@@ -51,6 +53,16 @@ module "network" {
     AzureBastionSubnet   = "10.0.0.192/27"
     GatewaySubnet        = "10.0.0.224/27"
   }
+}
+
+output "vnet" {
+  value       = module.network.vnet
+  description = "The module's vnet object."
+}
+
+output "subnets" {
+  value       = module.network.subnets
+  description = "The module's subnets object."
 }
 ```
 

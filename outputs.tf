@@ -6,6 +6,7 @@ output "vnet" {
     name            = azurerm_virtual_network.vnet.name                // var.vnet_name
     address_space   = azurerm_virtual_network.vnet.address_space
     dns             = azurerm_virtual_network.vnet.dns_servers
+    ddos            = var.ddos ? azurerm_network_ddos_protection_plan.ddos["Standard"].id : null
   }
 
   /* Type constraint for use with variable definitions
@@ -26,6 +27,7 @@ output "subnets" {
     for subnet, address_prefix in var.subnets :
     subnet => {
       name              = subnet
+      id                = azurerm_subnet.subnet[subnet].id
       address_prefix    = address_prefix
       nsg_id            = contains(keys(var.nsgs), subnet) ? var.nsgs[subnet] : null
       service_endpoints = contains(keys(var.service_endpoints), subnet) ? var.service_endpoints[subnet] : null
@@ -42,4 +44,8 @@ output "subnets" {
       service_endpoints = list(string)
     })
   */
+}
+
+output "hub_vnet" {
+  value = local.hub_vnet
 }
