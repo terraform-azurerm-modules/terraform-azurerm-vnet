@@ -117,7 +117,7 @@ resource "azurerm_virtual_network_peering" "hub_to_spoke" {
 resource "azurerm_public_ip" "vpngw" {
   for_each            = local.vpngw
 
-  name                = "each.value"
+  name                = each.value
   resource_group_name = var.resource_group
   location            = var.location
   tags                = var.tags
