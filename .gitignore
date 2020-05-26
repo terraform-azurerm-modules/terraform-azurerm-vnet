@@ -1,2 +1,4 @@
 .terraform/*
 terraform.tf*
+provider.tf
+.terraform.tfstate.lock.info

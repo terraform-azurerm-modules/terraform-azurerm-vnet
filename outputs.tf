@@ -29,8 +29,8 @@ output "subnets" {
       name              = subnet
       id                = azurerm_subnet.subnet[subnet].id
       address_prefix    = address_prefix
-      nsg_id            = contains(keys(var.nsgs), subnet) ? var.nsgs[subnet] : null
-      service_endpoints = contains(keys(var.service_endpoints), subnet) ? var.service_endpoints[subnet] : null
+      nsg_id            = contains(keys(var.nsgs), subnet) ? var.nsgs[subnet] : ""
+      service_endpoints = contains(keys(var.service_endpoints), subnet) ? var.service_endpoints[subnet] : []
     }
   }
 
@@ -39,6 +39,7 @@ output "subnets" {
 
     subnet = object({
       name              = string
+      id                = string
       address_prefix    = string
       nsg_id            = string
       service_endpoints = list(string)

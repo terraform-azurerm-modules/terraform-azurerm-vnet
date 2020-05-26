@@ -1,4 +1,4 @@
-variable "resource_group" {
+variable "resource_group_name" {
   type        = string
   description = "Name of an existing resource group to deply the virtual network into."
 }

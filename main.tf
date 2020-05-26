@@ -1,9 +1,6 @@
 data "azurerm_client_config" "current" {}
 
 locals {
-  // Avoid lists of maps as for_each want either sets or maps
-  // And dynamic maps using for x in y cause errors in nested modules
-  // Convert into a map of maps
   service_endpoints = {
     for subnet in keys(var.service_endpoints) :
     subnet => [
@@ -29,13 +26,17 @@ locals {
 
 }
 
+data "azurerm_resource_group" "vnet" {
+  name = var.resource_group_name
+}
+
 resource "azurerm_network_ddos_protection_plan" "ddos" {
   for_each = local.ddos_vnet
   name     = each.value
 
-  resource_group_name = var.resource_group
-  location            = var.location
-  tags                = var.tags
+  resource_group_name = data.azurerm_resource_group.vnet.name
+  location            = length(var.location) > 0 ? var.location : data.azurerm_resource_group.vnet.location
+  tags                = length(var.tags) > 0 ? var.tags : data.azurerm_resource_group.vnet.tags
 
   lifecycle {
     ignore_changes = [tags]
@@ -44,9 +45,9 @@ resource "azurerm_network_ddos_protection_plan" "ddos" {
 
 resource "azurerm_virtual_network" "vnet" {
   name                = var.vnet_name
-  resource_group_name = var.resource_group
-  location            = var.location
-  tags                = var.tags
+  resource_group_name = data.azurerm_resource_group.vnet.name
+  location            = length(var.location) > 0 ? var.location : data.azurerm_resource_group.vnet.location
+  tags                = length(var.tags) > 0 ? var.tags : data.azurerm_resource_group.vnet.tags
   depends_on          = [var.module_depends_on]
 
   address_space = var.address_space
@@ -66,13 +67,13 @@ resource "azurerm_virtual_network" "vnet" {
 }
 
 resource "azurerm_subnet" "subnet" {
-  resource_group_name  = var.resource_group
+  resource_group_name  = data.azurerm_resource_group.vnet.name
   virtual_network_name = azurerm_virtual_network.vnet.name
 
   for_each = var.subnets
 
   name              = each.key
-  address_prefix    = each.value
+  address_prefixes  = flatten([each.value])
   service_endpoints = contains(keys(local.service_endpoints), each.key) ? local.service_endpoints[each.key] : null
 }
 
@@ -82,9 +83,6 @@ resource "azurerm_subnet_network_security_group_association" "subnet" {
   subnet_id                 = azurerm_subnet.subnet[each.key].id
   network_security_group_id = each.value
 }
-
-//  spoke_to_hub = length(var.hub_vnet_name) ? [ "${var.vnet_name}_to_${var.hub_vnet_name}" ] : []
-//  hub_to_spoke = length(var.hub_vnet_name) ? [ "${var.hub_vnet_name}_to_${var.vnet_name}" ] : []
 
 resource "azurerm_virtual_network_peering" "spoke_to_hub" {
   for_each                  = local.spoke_to_hub
@@ -118,9 +116,9 @@ resource "azurerm_public_ip" "vpngw" {
   for_each            = local.vpngw
 
   name                = each.value
-  resource_group_name = var.resource_group
-  location            = var.location
-  tags                = var.tags
+  resource_group_name = data.azurerm_resource_group.vnet.name
+  location            = length(var.location) > 0 ? var.location : data.azurerm_resource_group.vnet.location
+  tags                = length(var.tags) > 0 ? var.tags : data.azurerm_resource_group.vnet.tags
 
   allocation_method = "Dynamic"
 }
@@ -129,9 +127,9 @@ resource "azurerm_virtual_network_gateway" "vpn" {
   for_each            = local.vpngw
 
   name                = each.value
-  resource_group_name = var.resource_group
-  location            = var.location
-  tags                = var.tags
+  resource_group_name = data.azurerm_resource_group.vnet.name
+  location            = length(var.location) > 0 ? var.location : data.azurerm_resource_group.vnet.location
+  tags                = length(var.tags) > 0 ? var.tags : data.azurerm_resource_group.vnet.tags
 
   type       = "Vpn"
   vpn_type   = var.vpngw_sku == "Basic" ? "PolicyBased" : "RouteBased"
