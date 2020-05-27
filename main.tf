@@ -1,3 +1,9 @@
+terraform {
+  required_providers {
+    azurerm = ">= 2.8.0" // For move to address_prefixes
+  }
+}
+
 data "azurerm_client_config" "current" {}
 
 locals {
