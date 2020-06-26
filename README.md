@@ -1,5 +1,7 @@
 # terraform-azurerm-vnet
 
+***Note that this repo may be deprecated as it does not give much more than the standard azurerm providers.***
+
 ## Description
 
 This Terraform module deploys a vNet with any number of subnets.
